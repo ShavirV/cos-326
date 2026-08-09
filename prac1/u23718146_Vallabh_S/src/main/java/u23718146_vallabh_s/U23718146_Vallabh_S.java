@@ -1,5 +1,8 @@
 package u23718146_vallabh_s;
 
+import javax.persistence.*;
+import java.util.*;
+
 /**
  *
  * @author Shavir
@@ -7,6 +10,10 @@ package u23718146_vallabh_s;
 public class U23718146_Vallabh_S {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("prac1");
+        EntityManager em = emf.createEntityManager();
+        System.out.println("Connected OK");
+        em.close();
+        emf.close();
     }
 }
