@@ -163,4 +163,36 @@ public class BookingService {
         }
     }
 
+    //should happen when booking lapses or manually
+    public void updateBookingStatus(Long bookingId, Booking.Status newStatus){
+        EntityManager em = emf.createEntityManager();
+        try {
+            Booking b = em.find(Booking.class, bookingId);
+            if (b == null){
+                throw new IllegalArgumentException("No booking found with this id " + bookingId);
+            }
+            em.getTransaction().begin();
+            b.setStatus(newStatus);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+
+    // removes a booking rather than editing its status acc to spec
+    public void cancelBooking(Long bookingId){
+        EntityManager em = emf.createEntityManager();
+        try {
+            Booking b = em.find(Booking.class, bookingId);
+            if (b == null){
+                throw new IllegalArgumentException("No booking found with this id " + bookingId);
+            }
+            em.getTransaction().begin();
+            em.remove(b); ///remove() does what you expect
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+
 }
