@@ -6,6 +6,9 @@ import java.time.LocalDate;
 import javax.annotation.processing.Generated;
 import javax.persistence.*;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  *
  * @author Shavir
@@ -15,6 +18,11 @@ import javax.persistence.*;
 public class Equipment implements Serializable{
     private static final Long serialVersionUID = 1L;
 
+    public enum Status{
+        AVAILABLE,
+        UNAVAILABLE
+    }
+
     @Id
     @GeneratedValue
     private Long equipmentId;
@@ -23,10 +31,16 @@ public class Equipment implements Serializable{
     private String category;
     private LocalDate purchaseDate;
     private Integer replacementCost;
-    private String status;
     
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
-    public Equipment(String n, String c, LocalDate d, Integer r, String s){
+    //one piece of equipment may have many bookings
+    //mappedBy= "equipment" means that the Booking class owns the fk
+    @OneToMany(mappedBy = "equipment", cascade = CascadeType.PERSIST)
+    private List<Booking> bookings = new ArrayList<>();
+
+    public Equipment(String n, String c, LocalDate d, Integer r, Status s){
         name = n;
         category = c;
         purchaseDate = d;
@@ -74,12 +88,25 @@ public class Equipment implements Serializable{
         this.replacementCost = replacementCost;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
+    }
+
+        public List<Booking> getBookings() {
+        return bookings;
+    }
+ 
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
+    }
+ 
+    public void addBooking(Booking booking) {
+        bookings.add(booking);
+        booking.setEquipment(this);
     }
 
     

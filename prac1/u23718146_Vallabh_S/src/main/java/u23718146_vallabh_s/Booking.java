@@ -15,6 +15,12 @@ import javax.persistence.*;
 public class Booking implements Serializable{
     private static final Long serialVersionUID = 1L;
     
+    public enum Status  {
+        ACTIVE,
+        CONCLUDED,
+        CANCELLED
+    }
+
     @Id
     @GeneratedValue
     private Long bookingId;
@@ -23,16 +29,30 @@ public class Booking implements Serializable{
     private LocalTime startTime;
     private LocalTime endTime;
     private String researchPurpose;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    // many bookings may belong to one researcher
+    // this side owns the FK
+    @ManyToOne
+    private Researcher researcher;
     
+    // many bookings can be made for one piece of equipment
+    @ManyToOne
+    private Equipment equipment;
     
     protected Booking() {
     }
 
-    public Booking(LocalDate date, LocalTime startTime, LocalTime endTime, String researchPurpose) {
+    public Booking(LocalDate date, LocalTime startTime, LocalTime endTime, Status status, String researchPurpose, Researcher researcher, Equipment equipment) {
         this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.status = status;
         this.researchPurpose = researchPurpose;
+        this.researcher = researcher;
+        this.equipment = equipment;
     }
 
     public Long getBookingId() {
@@ -74,4 +94,29 @@ public class Booking implements Serializable{
     public void setResearchPurpose(String researchPurpose) {
         this.researchPurpose = researchPurpose;
     }
+
+    public Status getStatus() {
+        return status;
+    }
+ 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+ 
+    public Researcher getResearcher() {
+        return researcher;
+    }
+ 
+    public void setResearcher(Researcher researcher) {
+        this.researcher = researcher;
+    }
+ 
+    public Equipment getEquipment() {
+        return equipment;
+    }
+ 
+    public void setEquipment(Equipment equipment) {
+        this.equipment = equipment;
+    }
+
 }
