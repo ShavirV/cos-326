@@ -1,7 +1,9 @@
 package u23718146_vallabh_s;
 
+import javax.management.QueryEval;
 import javax.persistence.*;
 
+import u23718146_vallabh_s.Booking;
 import u23718146_vallabh_s.Equipment;
 import u23718146_vallabh_s.Researcher;
 
@@ -42,7 +44,7 @@ public class BookingService {
     public Researcher findResearcher(Long id){
         EntityManager em = emf.createEntityManager();
         try{
-            // .find() -> search using class PK
+            /// .find() -> search using class PK
             return em.find(Researcher.class, id);
         } finally {
             em.close();
@@ -74,5 +76,91 @@ public class BookingService {
     }
 
     // Bookings methods
-    
+
+    // most of the rules are enforced here
+    public Booking createBooking(LocalDate date, LocalTime startTime, LocalTime endTime,
+                                 String researchPurpose, Long researcherId, long equipmentId){
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            Researcher researcher = em.find(Researcher.class, researcherId);
+            Equipment equipment = em.find(Equipment.class, equipmentId);
+
+            // dont allow bookings with non existent researchers or equipment
+            if (researcher == null) {
+                throw new IllegalArgumentException("No researcher found with ID " + researcherId);
+            }
+            if (equipment == null) {
+                throw new IllegalArgumentException("No equipment found with ID " + equipmentId);
+            }
+
+            if (equipment.getStatus() == Equipment.Status.UNAVAILABLE) {
+                throw new IllegalArgumentException("This equipment is not available at the moment.");
+            }
+
+            // valid times
+            if (startTime == null || endTime == null || !startTime.isBefore(endTime)){
+                throw new IllegalArgumentException("Start time must be before end time");
+            }
+
+            // cant create bookings in the past
+            if (date == null || date.isBefore(LocalDate.now())){
+                throw new IllegalArgumentException("Cannot create bookings in the past");
+            }
+
+            // researcher cannot have more than 3 active bookings at a time 
+            Query activeCount = em.createQuery(
+                "SELECT COUNT(b FROM Booking b WHERE b.researcher = :r AND b.status == :status");
+            /// :var to set them later
+            activeCount.setParameter("r", researcher);
+            activeCount.setParameter("status", Booking.Status.ACTIVE);
+
+            Long count = (Long) activeCount.getSingleResult();
+            if (count >= 3){
+                throw new IllegalArgumentException("This researcher already has 3 active bookings.");
+            }
+
+            // ensure no overlapping bookings (same date and overlapping time range that havent been cancelled)
+            Query conflictQuery = em.createQuery(
+                "SELECT b FROM Booking b WHERE b.equipment = :eq AND b.date = :d AND b.date = :d AND b.status <> :cancelled AND b.startTime < :end AND B.endTime > :start"
+            );
+            conflictQuery.setParameter("eq", equipment);
+            conflictQuery.setParameter("d", date);
+            conflictQuery.setParameter("cancelled", Booking.Status.CANCELLED);
+            conflictQuery.setParameter("start", startTime);
+            conflictQuery.setParameter("end", endTime);
+
+            /// .getResultList() -> get all results as a list obv
+            List<?> conflicts = conflictQuery.getResultList(); 
+
+            if (!conflicts.isEmpty()){
+                throw new IllegalArgumentException("This equipment is already booked during that time");
+            }
+
+            //a researcher may not have multiple bookings for the same equipment on the same date
+            Query sameDayQuery = em.createQuery(
+                "SELECT b from Booking b WHERE b.researcher = :r AND b.equipment = :eq AND b.date = :d AND b.status <> :cancelled"
+            );
+            sameDayQuery.setParameter("r", researcher);
+            sameDayQuery.setParameter("eq", equipment);
+            sameDayQuery.setParameter("d", date);
+            sameDayQuery.setParameter("cancelled", Booking.Status.CANCELLED);
+            if (!sameDayQuery.getResultList().isEmpty()){
+                throw new IllegalArgumentException("This researcher has already booked this equipment on this date");
+            }
+
+            // yay we finally passed all the rules 
+
+            Booking booking = new Booking(date, startTime, endTime, Booking.Status.ACTIVE, researchPurpose, researcher, equipment);
+
+            em.getTransaction().begin();
+            em.persist(booking);
+            em.getTransaction().commit();
+            return booking;
+
+        } finally {
+            em.close();
+        }
+    }
+
 }
