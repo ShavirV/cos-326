@@ -66,9 +66,11 @@ public class MainGui extends JFrame {
         JPanel searchForm = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JTextField searchIdField = new JTextField(10);
         JButton searchBtn = new JButton("Search by Researcher ID");
+        JButton viewAllBtn = new JButton("View All Researchers");
         searchForm.add(new JLabel("Researcher ID:"));
         searchForm.add(searchIdField);
         searchForm.add(searchBtn);
+        searchForm.add(viewAllBtn);
 
         JTextArea output = new JTextArea();
         output.setEditable(false);
@@ -136,6 +138,23 @@ public class MainGui extends JFrame {
             }
         });
 
+        viewAllBtn.addActionListener(e -> {
+            List<Researcher> all = service.getAllResearchers();
+            StringBuilder sb = new StringBuilder("All Researchers:\n\n");
+            if (all.isEmpty()) {
+                sb.append("  (no researchers registered)\n");
+            } else {
+                for (Researcher r : all) {
+                    sb.append("  ").append(r.getId())
+                    .append(" - ").append(r.getDepartment())
+                    .append(" | ").append(r.getEmail())
+                    .append(" | Bookings: ").append(r.getBookings().size())
+                    .append("\n");
+                }
+            }
+            output.setText(sb.toString());
+        });
+
         return panel;
     }
 
@@ -165,17 +184,20 @@ public class MainGui extends JFrame {
         form.add(statusBox);
         form.add(new JLabel());
         form.add(registerBtn);
+        
 
         JPanel searchForm = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JTextField searchIdField = new JTextField(10);
         JButton searchBtn = new JButton("Search by Equipment ID");
         JButton availableBtn = new JButton("Show Available Equipment");
         JButton neverBookedBtn = new JButton("Show Never-Booked Equipment");
+        JButton viewAllBtn = new JButton("View All Equipment");
         searchForm.add(new JLabel("Equipment ID:"));
         searchForm.add(searchIdField);
         searchForm.add(searchBtn);
         searchForm.add(availableBtn);
         searchForm.add(neverBookedBtn);
+        searchForm.add(viewAllBtn);
 
         JTextArea output = new JTextArea();
         output.setEditable(false);
@@ -283,6 +305,24 @@ public class MainGui extends JFrame {
             output.setText(sb.toString());
         });
 
+        viewAllBtn.addActionListener(e -> {
+            List<Equipment> all = service.getAllEquipment();
+            StringBuilder sb = new StringBuilder("All Equipment:\n\n");
+            if (all.isEmpty()) {
+                sb.append("  (no equipment registered)\n");
+            } else {
+                for (Equipment eq : all) {
+                    sb.append("  ").append(eq.getId())
+                    .append(" - ").append(eq.getName())
+                    .append(" (").append(eq.getCategory()).append(")")
+                    .append(" | Status: ").append(eq.getStatus())
+                    .append(" | Cost: ").append(eq.getReplacementCost())
+                    .append("\n");
+                }
+            }
+            output.setText(sb.toString());
+        });
+
         return panel;
     }
 
@@ -321,12 +361,14 @@ public class MainGui extends JFrame {
         JComboBox<Booking.Status> statusBox = new JComboBox<>(Booking.Status.values());
         JButton updateBtn = new JButton("Update Status");
         JButton cancelBtn = new JButton("Cancel Booking");
+        JButton viewAllBtn = new JButton("View All Bookings");
         manageForm.add(new JLabel("Booking ID:"));
         manageForm.add(bookingIdField);
         manageForm.add(new JLabel("New Status:"));
         manageForm.add(statusBox);
         manageForm.add(updateBtn);
         manageForm.add(cancelBtn);
+        manageForm.add(viewAllBtn);
 
         JTextArea output = new JTextArea();
         output.setEditable(false);
@@ -387,6 +429,25 @@ public class MainGui extends JFrame {
                 JOptionPane.showMessageDialog(this, ex.getMessage(),
                         "Update Failed", JOptionPane.ERROR_MESSAGE);
             }
+        });
+
+        viewAllBtn.addActionListener(e -> {
+            List<Booking> all = service.getAllBookings();
+            StringBuilder sb = new StringBuilder("All Bookings:\n\n");
+            if (all.isEmpty()) {
+                sb.append("  (no bookings exist)\n");
+            } else {
+                for (Booking b : all) {
+                    sb.append("  ").append(b.getBookingId())
+                    .append(" | ").append(b.getDate())
+                    .append(" ").append(b.getStartTime()).append("-").append(b.getEndTime())
+                    .append(" | Status: ").append(b.getStatus())
+                    .append(" | Researcher: ").append(b.getResearcher().getId())
+                    .append(" | Equipment: ").append(b.getEquipment().getName())
+                    .append("\n");
+                }
+            }
+            output.setText(sb.toString());
         });
 
         cancelBtn.addActionListener(e -> {

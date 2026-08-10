@@ -56,6 +56,16 @@ public class BookingService {
         }
     }
 
+    public List<Researcher> getAllResearchers() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query q = em.createQuery("SELECT r FROM Researcher r");
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
     // Equipment methods
     public Equipment registerEquipment(String name, String category, LocalDate purchaseDate,
                                         Integer replacementCost, Equipment.Status status) {
@@ -120,6 +130,15 @@ public class BookingService {
         }
     }
 
+    public List<Equipment> getAllEquipment() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query q = em.createQuery("SELECT e FROM Equipment e");
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
+    }
     // Bookings methods
 
     // most of the rules are enforced here
@@ -283,6 +302,16 @@ public class BookingService {
 
             return top;
 
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Booking> getAllBookings() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query q = em.createQuery("SELECT b FROM Booking b");
+            return q.getResultList();
         } finally {
             em.close();
         }
