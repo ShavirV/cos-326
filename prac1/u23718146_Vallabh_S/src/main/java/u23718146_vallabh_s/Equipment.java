@@ -41,6 +41,9 @@ public class Equipment implements Serializable{
     @OneToMany(mappedBy = "equipment", cascade = CascadeType.PERSIST)
     private List<Booking> bookings = new ArrayList<>();
 
+    public Equipment(){
+    }
+
     public Equipment(String n, String c, LocalDate d, Integer r, Status s){
         name = n;
         category = c;
