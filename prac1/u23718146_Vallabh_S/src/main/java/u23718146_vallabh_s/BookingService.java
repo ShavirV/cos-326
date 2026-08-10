@@ -12,6 +12,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author Shavir
+ */
 
 public class BookingService {
     
@@ -87,7 +91,7 @@ public class BookingService {
             if (result == null){
                 return 0.0;
             }
-            return ((Number) result).doubleValue()
+            return ((Number) result).doubleValue();
         } finally {
             em.close();
         }
@@ -245,7 +249,7 @@ public class BookingService {
             q.setParameter("id", researcherId);
             return q.getResultList();
         } finally {
-            em.close()
+            em.close();
         }
     }
 
