@@ -126,8 +126,18 @@ public class BookingService {
     public List<Equipment> getNeverBookedEquipment() {
         EntityManager em = emf.createEntityManager();
         try {
-            Query q = em.createQuery("SELECT e FROM Equipment e WHERE e.bookings IS EMPTY");
-            return q.getResultList();
+            // simple select was not working so we do 2 queries now
+            // get equipment referenced by bookings
+            Query bookedQ = em.createQuery("SELECT DISTINCT b.equipment FROM Booking b");
+            List<Equipment> booked = bookedQ.getResultList();
+
+            // get all equipment
+            Query allQ = em.createQuery("SELECT e FROM Equipment e");
+            List<Equipment> all = allQ.getResultList();
+
+            // bodged subtraction should yield never booked
+            all.removeAll(booked);
+            return all;
         } finally {
             em.close();
         }
