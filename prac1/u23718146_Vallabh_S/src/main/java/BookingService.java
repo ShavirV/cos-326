@@ -9,6 +9,7 @@ import u23718146_vallabh_s.Researcher;
 
 import java.time.LocalTime;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -70,6 +71,46 @@ public class BookingService {
         EntityManager em = emf.createEntityManager();
         try {
             return em.find(Equipment.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public double getTotalReplacementCost(){
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query q = em.createQuery(
+                "SELECT SUM(e.replacementCost) FROM Equipment e"
+            );
+            //gotta be a generic object then cast i wish i knew why
+            Object result = q.getSingleResult();
+            if (result == null){
+                return 0.0;
+            }
+            return ((Number) result).doubleValue()
+        } finally {
+            em.close();
+        }
+    }
+
+    // equipment with available status
+    public List<Equipment> getAvailableEquipment() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query q = em.createQuery("SELECT e FROM Equipment e WHERE e.status = :status");
+            q.setParameter("status", Equipment.Status.AVAILABLE);
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // equipment with no bookings assoc, even cancelled bookings 
+    public List<Equipment> getNeverBookedEquipment() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query q = em.createQuery("SELECT e FROM Equipment e WHERE e.bookings IS EMPTY");
+            return q.getResultList();
         } finally {
             em.close();
         }
@@ -195,4 +236,51 @@ public class BookingService {
         }
     }
 
+    public List<Booking> getBookingsForResearcher(Long researcherId){
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query q = em.createQuery(
+                "SELECT b FROM Booking b WHERE b.researcher.researcherId = :id"
+            );
+            q.setParameter("id", researcherId);
+            return q.getResultList();
+        } finally {
+            em.close()
+        }
+    }
+
+    //return the researchers with the highest number of bookings
+    public List<Researcher> getTopResearchersByBookingCount(){
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query countsQuery = em.createQuery(
+                "SELECT b.researcher, COUNT(b) FROM Booking b GROUP BY b.researcher ORDER BY COUNT(b) DESC"
+            );
+            //is a list of objects, each group of researcher
+            List<Object[]> rows = countsQuery.getResultList();
+            //now determine where the ties end, since list already sorted
+            List<Researcher> top = new ArrayList<>();
+
+            if (rows.isEmpty()){
+                return top;
+            }
+
+            // first row obvs has the max
+            long max = (Long) rows.get(0)[1];
+
+            for (Object[] row : rows) {
+                long count = (Long) row[1];
+                if (count == max) {
+                    top.add((Researcher) row[0]);
+                } else {
+                    break;
+                }
+            }
+
+            return top;
+
+        } finally {
+            em.close();
+        }
+    }
 }
