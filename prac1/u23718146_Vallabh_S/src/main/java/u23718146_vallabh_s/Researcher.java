@@ -12,11 +12,11 @@ import javax.persistence.*;
 
 @Entity
 public class Researcher implements Serializable{
-    private static final long serialVersionUID = 1L;
+    private static final Long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue
-    private long researcherId;
+    private Long researcherId;
 
     private String name;
     private String department;
