@@ -2,6 +2,7 @@ package u23718146_vallabh_s;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import javax.annotation.processing.Generated;
 import javax.persistence.*;
