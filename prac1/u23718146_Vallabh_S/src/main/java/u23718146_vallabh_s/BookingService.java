@@ -59,7 +59,10 @@ public class BookingService {
     public List<Researcher> getAllResearchers() {
         EntityManager em = emf.createEntityManager();
         try {
-            Query q = em.createQuery("SELECT r FROM Researcher r");
+            //the below dont work because bookings not loaded yet. 
+            //so we force bookings to load, since they are used in the gui when researchers are displayed
+            //Query q = em.createQuery("SELECT r FROM Researcher r");
+            Query q = em.createQuery("SELECT DISTINCT r FROM Researcher r LEFT JOIN FETCH r.bookings");
             return q.getResultList();
         } finally {
             em.close();
@@ -174,7 +177,7 @@ public class BookingService {
 
             // researcher cannot have more than 3 active bookings at a time 
             Query activeCount = em.createQuery(
-                "SELECT COUNT(b FROM Booking b WHERE b.researcher = :r AND b.status == :status");
+                "SELECT COUNT(b) FROM Booking b WHERE b.researcher = :r AND b.status == :status");
             /// :var to set them later
             activeCount.setParameter("r", researcher);
             activeCount.setParameter("status", Booking.Status.ACTIVE);

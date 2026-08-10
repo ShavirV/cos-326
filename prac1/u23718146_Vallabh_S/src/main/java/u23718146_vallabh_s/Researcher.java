@@ -59,7 +59,7 @@ public class Researcher implements Serializable{
     }
 
     public List<Booking> getBookings() {
-        return bookings;
+        return bookings != null ? bookings : new ArrayList<>();
     }
  
     public void setBookings(List<Booking> bookings) {
