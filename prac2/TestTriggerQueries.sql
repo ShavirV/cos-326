@@ -27,7 +27,6 @@ ROLLBACK TO SAVEPOINT tc1_savepoint;
 
 
 -- TC-2: INSERT / UPDATE on NetworkIncident with duplicate evidence hashes
--- Tested condition : evidence_hashes contains 'hash_101' twice.
 -- Expected result   : trg_check_evidence_integrity aborts the statement
 --                     with an exception.
 SAVEPOINT tc2_savepoint;
@@ -37,7 +36,7 @@ BEGIN
     INSERT INTO NetworkIncident (incident_code, target_ip, severity, detected_at, slice_id, evidence_hashes)
     VALUES ('NI-BAD2', '10.0.0.98', 'HIGH', now(), 'SLICE-B2', ARRAY['hash_101', 'hash_101']);
 
-    RAISE NOTICE 'TC-2 FAILED: insert with duplicate hashes was NOT rejected.';
+    RAISE NOTICE 'TC-2 FAILED: insert with duplicate hashes was not rejected.';
 EXCEPTION WHEN OTHERS THEN
     RAISE NOTICE 'TC-2 PASSED: insert correctly rejected -> %', SQLERRM;
 END;
@@ -45,11 +44,9 @@ $$;
 
 ROLLBACK TO SAVEPOINT tc2_savepoint;
 
--- Also demonstrate the UPDATE path, since the spec says "INSERT / UPDATE":
--- take the existing valid row NI-0002 (evidence_hashes = {hash_103}) and
--- try to update it to contain a duplicate.
 SAVEPOINT tc2b_savepoint;
 
+-- the update action should work the exact same
 DO $$
 BEGIN
     UPDATE NetworkIncident
@@ -66,15 +63,11 @@ ROLLBACK TO SAVEPOINT tc2b_savepoint;
 
 
 -- TC-3: DELETE FROM NetworkIncident
--- Tested condition : delete an existing, valid network incident record
---                     (NI-0003, inserted in InsertQueries.sql).
--- Expected result   : row is removed from NetworkIncident AND a
---                     matching row appears in DeletedIncidentAudit with
---                     incident_type = 'NetworkIncident'.
+-- Expected result : row is removed from NetworkIncident AND a
+-- matching row appears in DeletedIncidentAudit with incident_type = 'NetworkIncident'
 DELETE FROM NetworkIncident WHERE incident_code = 'NI-0003';
 
--- Verification query for the marker: confirms (a) the live row is gone
--- and (b) the audit row is present with the correct captured attributes.
+-- Verification query confirms (a) the live row is gone (b) the audit row is present with the correct captured attributes
 SELECT 'TC-3 live row remaining (expect 0 rows)' AS check_label, *
 FROM NetworkIncident WHERE incident_code = 'NI-0003';
 
@@ -85,11 +78,7 @@ WHERE incident_code = 'NI-0003' AND incident_type = 'NetworkIncident';
 
 
 -- TC-4: DELETE FROM NodeBreachIncident
--- Tested condition : delete an existing node breach incident record
---                     (NB-0002, inserted in InsertQueries.sql).
--- Expected result   : row is removed from NodeBreachIncident AND a
---                     matching row appears in DeletedIncidentAudit with
---                     incident_type = 'NodeBreachIncident'.
+-- Expected result : same as case 3
 DELETE FROM NodeBreachIncident WHERE incident_code = 'NB-0002';
 
 SELECT 'TC-4 live row remaining (expect 0 rows)' AS check_label, *
