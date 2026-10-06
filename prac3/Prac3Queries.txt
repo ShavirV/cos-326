@@ -1,0 +1,176 @@
+(:   TASK 1
+   Names of animals older than 10 whose conservation status is not
+   'Least Concern'
+   - The two conditions are combined in ONE predicate with 'and'
+   - age is compared with a number, so it is atomised and cast to a number
+:)
+
+doc('wildlife/wildlife.xml')/wildlife/animal[age > 10 and status != 'Least Concern']/name/text()
+
+
+(:   TASK 2
+   Animals observed in a reserve different from their home reserve.
+   Each animal/observed-reserve pair appears once, ordered by animal name,
+   then by observed reserve
+   - wildlife.xml and observations.xml are related through animal_id
+   - distinct-values() over the reserves of that animal removes duplicates
+     (an animal seen 3 times in the same foreign reserve is reported once)
+:)
+
+let $wildlife := doc('wildlife/wildlife.xml')
+let $obs      := doc('observations/observations.xml')
+for $a in $wildlife/wildlife/animal
+let $seenIn := distinct-values($obs/observations/observation[animal_id = $a/animal_id]/reserve)
+for $r in $seenIn
+where $r != $a/home_reserve
+order by string($a/name), $r
+return
+  <movement>
+    <animal>{ string($a/name) }</animal>
+    <homeReserve>{ string($a/home_reserve) }</homeReserve>
+    <observedReserve>{ $r }</observedReserve>
+  </movement>
+
+
+(:   TASK 3
+   Reserves whose total observed individuals exceed the average reserve total.
+   - $totals : one <reserve> element per distinct reserve with its sum().
+   - $avg    : avg() of those reserve totals (average OVER RESERVES, not over
+               individual observations).
+   - Filter on the aggregate, order descending.
+:)
+
+let $obs := doc('observations/observations.xml')
+let $totals :=
+  for $r in distinct-values($obs/observations/observation/reserve)
+  let $t := sum($obs/observations/observation[reserve = $r]/individuals)
+  return <reserve name="{ $r }" total="{ $t }"/>
+let $avg := avg(for $t in $totals return xs:double($t/@total))
+for $x in $totals
+where xs:double($x/@total) > $avg
+order by xs:double($x/@total) descending
+return
+  <reserveSummary>
+    <reserve>{ string($x/@name) }</reserve>
+    <totalObserved>{ string($x/@total) }</totalObserved>
+  </reserveSummary>
+
+
+(:   TASK 4
+   Per species: number of observations and average individuals per
+   observation. Only species with >= 2 observations. Two decimals.
+   Highest average first.
+   - species lives in wildlife.xml, observations reference animals by id,
+     so: species -> its animal_ids -> observations with those ids.
+   - Observations are counted (not animals), so an animal observed 3 times
+     contributes 3.
+   - round($avg * 100) div 100 rounds half-up explicitly (7.125 -> 7.13);
+     format-number(..., '0.00') then pads to exactly two decimal places.
+     (format-number alone may round half-to-even, e.g. 7.125 -> 7.12.)
+:)
+
+let $wildlife := doc('wildlife/wildlife.xml')
+let $obs      := doc('observations/observations.xml')
+for $s in distinct-values($wildlife/wildlife/animal/species)
+let $ids := $wildlife/wildlife/animal[species = $s]/animal_id
+let $o   := $obs/observations/observation[animal_id = $ids]
+let $n   := count($o)
+let $avg := avg(for $i in $o/individuals return xs:double($i))
+where $n >= 2
+order by $avg descending, $s
+return
+  <speciesAnalysis>
+    <species>{ $s }</species>
+    <observations>{ $n }</observations>
+    <averageGroupSize>{ format-number(round($avg * 100) div 100, '0.00') }</averageGroupSize>
+  </speciesAnalysis>
+
+
+(:   TASK 5
+   - $counts : one entry per animal with its number of observations.
+   - $max    : max() of those counts.
+   - Keep EVERY animal whose count equals $max (never assumes a single winner,
+     e.g. no use of [1] or 'order by ... return [1]').
+   Ordered alphabetically by animal name.
+:)
+
+let $wildlife := doc('wildlife/wildlife.xml')
+let $obs      := doc('observations/observations.xml')
+let $counts :=
+  for $a in $wildlife/wildlife/animal
+  return
+    <c name="{ string($a/name) }"
+       n="{ count($obs/observations/observation[animal_id = $a/animal_id]) }"/>
+let $max := max(for $c in $counts return xs:integer($c/@n))
+for $c in $counts
+where xs:integer($c/@n) = $max
+order by string($c/@name)
+return
+  <mostObserved>
+    <animal>{ string($c/@name) }</animal>
+    <observationCount>{ string($c/@n) }</observationCount>
+  </mostObserved>
+
+
+(:   TASK 6
+   - $counts : observation count per MONITORED animal (an animal that appears
+               in at least one observation), built from the distinct animal_ids
+               found in observations.xml.
+   - $avg    : overall average observations per monitored animal.
+   - Then: status is Vulnerable OR Endangered AND count < $avg.
+   Ordered by status, then animal name.
+:)
+
+let $wildlife := doc('wildlife/wildlife.xml')
+let $obs      := doc('observations/observations.xml')
+let $counts :=
+  for $id in distinct-values($obs/observations/observation/animal_id)
+  return <c id="{ $id }" n="{ count($obs/observations/observation[animal_id = $id]) }"/>
+let $avg := avg(for $c in $counts return xs:integer($c/@n))
+for $a in $wildlife/wildlife/animal
+let $n := xs:integer($counts[@id = $a/animal_id]/@n)
+where ($a/status = 'Vulnerable' or $a/status = 'Endangered')
+      and $n < $avg
+order by string($a/status), string($a/name)
+return
+  <monitoringAlert>
+    <animal>{ string($a/name) }</animal>
+    <status>{ string($a/status) }</status>
+    <observationCount>{ $n }</observationCount>
+  </monitoringAlert>
+
+
+(:   TASK 7
+   Animals observed in more than one distinct reserve.
+   - Outer FLWOR : one result per animal, filtered on the number of distinct
+                   reserves, ordered by name.
+   - Nested FLWOR #1 : counts observations per reserve for that animal.
+   - $max            : highest per-reserve count for that animal.
+   - Nested FLWOR #2 : returns ALL reserves whose count equals $max (ties).
+:)
+
+let $wildlife := doc('wildlife/wildlife.xml')
+let $obs      := doc('observations/observations.xml')
+for $a in $wildlife/wildlife/animal
+let $myObs    := $obs/observations/observation[animal_id = $a/animal_id]
+let $reserves := distinct-values($myObs/reserve)
+where count($reserves) > 1
+order by string($a/name)
+return
+  <rangeAnalysis>
+    <animal>{ string($a/name) }</animal>
+    <homeReserve>{ string($a/home_reserve) }</homeReserve>
+    <reserveCount>{ count($reserves) }</reserveCount>
+    <mostFrequentReserves>
+    {
+      let $rc :=
+        for $r in $reserves
+        return <rc name="{ $r }" n="{ count($myObs[reserve = $r]) }"/>
+      let $max := max(for $x in $rc return xs:integer($x/@n))
+      for $x in $rc
+      where xs:integer($x/@n) = $max
+      order by string($x/@name)
+      return <reserve>{ string($x/@name) }</reserve>
+    }
+    </mostFrequentReserves>
+  </rangeAnalysis>
