@@ -1,0 +1,857 @@
+[
+    {
+        "eventId": "EVT10001",
+        "timestamp": "2026-09-15T08:35:21Z",
+        "sourceIP": "192.168.10.25",
+        "destinationIP": "10.0.0.15",
+        "eventType": "Brute Force Attack",
+        "severity": "High",
+        "description": "Multiple failed authentication attempts detected against the employee portal.",
+        "source": "Authentication Server",
+        "affectedSystems": [
+            "Authentication Server",
+            "Employee Portal"
+        ],
+        "tags": [
+            "authentication",
+            "brute-force",
+            "login"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Source IP",
+                "status": "Completed"
+            },
+            {
+                "action": "Notify SOC Analyst",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10002",
+        "timestamp": "2026-09-15T09:12:44Z",
+        "sourceIP": "10.10.5.44",
+        "destinationIP": "10.0.2.21",
+        "eventType": "Malware Detection",
+        "severity": "Critical",
+        "description": "Malicious executable detected on a finance department workstation.",
+        "source": "Endpoint Security",
+        "affectedSystems": [
+            "FIN-PC-021"
+        ],
+        "tags": [
+            "malware",
+            "endpoint",
+            "finance"
+        ],
+        "responseActions": [
+            {
+                "action": "Isolate Endpoint",
+                "status": "Completed"
+            },
+            {
+                "action": "Collect Malware Sample",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10003",
+        "timestamp": "2026-09-15T10:04:18Z",
+        "sourceIP": "172.16.4.12",
+        "destinationIP": "10.0.1.50",
+        "eventType": "Port Scan",
+        "severity": "Medium",
+        "description": "Repeated connection attempts detected across multiple destination ports.",
+        "source": "Network IDS",
+        "affectedSystems": [
+            "Web Server"
+        ],
+        "tags": [
+            "network",
+            "reconnaissance",
+            "port-scan"
+        ],
+        "responseActions": [
+            {
+                "action": "Review Network Traffic",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10004",
+        "timestamp": "2026-09-15T10:48:09Z",
+        "sourceIP": "192.168.20.17",
+        "destinationIP": "10.0.0.8",
+        "eventType": "Suspicious Login",
+        "severity": "High",
+        "description": "Authentication from an unusual location detected for a privileged account.",
+        "source": "Authentication Server",
+        "affectedSystems": [
+            "Identity Management Server"
+        ],
+        "tags": [
+            "authentication",
+            "privileged-account",
+            "login"
+        ],
+        "responseActions": [
+            {
+                "action": "Verify User Identity",
+                "status": "Pending"
+            },
+            {
+                "action": "Notify SOC Analyst",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10005",
+        "timestamp": "2026-09-15T11:22:31Z",
+        "sourceIP": "10.10.7.31",
+        "destinationIP": "10.0.3.17",
+        "eventType": "Data Exfiltration",
+        "severity": "Critical",
+        "description": "Large outbound data transfer detected from a sensitive database server.",
+        "source": "Network IDS",
+        "affectedSystems": [
+            "Customer Database",
+            "Database Server"
+        ],
+        "tags": [
+            "data-loss",
+            "exfiltration",
+            "database"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Destination",
+                "status": "Completed"
+            },
+            {
+                "action": "Investigate Database Access",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10006",
+        "timestamp": "2026-09-15T12:05:55Z",
+        "sourceIP": "192.168.30.41",
+        "destinationIP": "10.0.4.12",
+        "eventType": "Phishing Attempt",
+        "severity": "Medium",
+        "description": "Suspicious email containing a credential harvesting link was reported.",
+        "source": "Email Security Gateway",
+        "affectedSystems": [
+            "Mail Server",
+            "Employee Workstation"
+        ],
+        "tags": [
+            "phishing",
+            "email",
+            "credential-theft"
+        ],
+        "responseActions": [
+            {
+                "action": "Quarantine Email",
+                "status": "Completed"
+            },
+            {
+                "action": "Notify User",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10007",
+        "timestamp": "2026-09-15T13:17:22Z",
+        "sourceIP": "10.20.1.14",
+        "destinationIP": "10.0.1.11",
+        "eventType": "Firewall Rule Violation",
+        "severity": "Low",
+        "description": "Outbound connection blocked by an existing firewall policy.",
+        "source": "Firewall",
+        "affectedSystems": [
+            "Application Server"
+        ],
+        "tags": [
+            "firewall",
+            "policy",
+            "network"
+        ],
+        "responseActions": [
+            {
+                "action": "Review Firewall Rule",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10008",
+        "timestamp": "2026-09-15T14:03:47Z",
+        "sourceIP": "172.16.8.19",
+        "destinationIP": "10.0.5.20",
+        "eventType": "Brute Force Attack",
+        "severity": "High",
+        "description": "Repeated authentication failures indicate a possible brute-force attack.",
+        "source": "Authentication Server",
+        "affectedSystems": [
+            "VPN Gateway"
+        ],
+        "tags": [
+            "authentication",
+            "brute-force",
+            "vpn"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Source IP",
+                "status": "Pending"
+            },
+            {
+                "action": "Reset Account Credentials",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10009",
+        "timestamp": "2026-09-15T14:56:12Z",
+        "sourceIP": "10.10.9.62",
+        "destinationIP": "10.0.6.14",
+        "eventType": "Malware Detection",
+        "severity": "High",
+        "description": "Suspicious script execution detected on an endpoint.",
+        "source": "Endpoint Security",
+        "affectedSystems": [
+            "HR-PC-014"
+        ],
+        "tags": [
+            "malware",
+            "endpoint",
+            "script"
+        ],
+        "responseActions": [
+            {
+                "action": "Scan Endpoint",
+                "status": "Completed"
+            },
+            {
+                "action": "Review Process Tree",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10010",
+        "timestamp": "2026-09-15T15:28:39Z",
+        "sourceIP": "192.168.40.28",
+        "destinationIP": "10.0.2.30",
+        "eventType": "SQL Injection Attempt",
+        "severity": "Critical",
+        "description": "Web application request contained a suspected SQL injection payload.",
+        "source": "Web Application Firewall",
+        "affectedSystems": [
+            "Customer Portal",
+            "Web Server"
+        ],
+        "tags": [
+            "web",
+            "sql-injection",
+            "attack"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Request",
+                "status": "Completed"
+            },
+            {
+                "action": "Review Application Logs",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10011",
+        "timestamp": "2026-09-15T16:11:03Z",
+        "sourceIP": "172.16.2.55",
+        "destinationIP": "10.0.7.18",
+        "eventType": "Suspicious Login",
+        "severity": "Medium",
+        "description": "Multiple successful logins from an unusual source were detected.",
+        "source": "Authentication Server",
+        "affectedSystems": [
+            "Identity Management Server"
+        ],
+        "tags": [
+            "authentication",
+            "login",
+            "anomaly"
+        ],
+        "responseActions": [
+            {
+                "action": "Verify User Identity",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10012",
+        "timestamp": "2026-09-15T17:02:16Z",
+        "sourceIP": "10.10.11.73",
+        "destinationIP": "10.0.8.22",
+        "eventType": "Port Scan",
+        "severity": "Low",
+        "description": "Low-volume network scan detected from an internal workstation.",
+        "source": "Network IDS",
+        "affectedSystems": [
+            "Internal Network"
+        ],
+        "tags": [
+            "network",
+            "reconnaissance",
+            "port-scan"
+        ],
+        "responseActions": [
+            {
+                "action": "Review Network Traffic",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10013",
+        "timestamp": "2026-09-16T07:45:27Z",
+        "sourceIP": "192.168.50.33",
+        "destinationIP": "10.0.9.44",
+        "eventType": "Phishing Attempt",
+        "severity": "High",
+        "description": "Credential harvesting email detected and blocked by the email gateway.",
+        "source": "Email Security Gateway",
+        "affectedSystems": [
+            "Mail Server"
+        ],
+        "tags": [
+            "phishing",
+            "email",
+            "credential-theft"
+        ],
+        "responseActions": [
+            {
+                "action": "Quarantine Email",
+                "status": "Completed"
+            },
+            {
+                "action": "Notify SOC Analyst",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10014",
+        "timestamp": "2026-09-16T08:32:10Z",
+        "sourceIP": "10.10.12.84",
+        "destinationIP": "10.0.3.17",
+        "eventType": "Data Exfiltration",
+        "severity": "High",
+        "description": "Unusual outbound traffic to an external destination was detected.",
+        "source": "Network IDS",
+        "affectedSystems": [
+            "Database Server"
+        ],
+        "tags": [
+            "exfiltration",
+            "network",
+            "data-loss"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Destination",
+                "status": "Pending"
+            },
+            {
+                "action": "Investigate Database Access",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10015",
+        "timestamp": "2026-09-16T09:18:45Z",
+        "sourceIP": "172.16.9.41",
+        "destinationIP": "10.0.2.21",
+        "eventType": "Malware Detection",
+        "severity": "Medium",
+        "description": "Potentially unwanted software detected on a workstation.",
+        "source": "Endpoint Security",
+        "affectedSystems": [
+            "Marketing-PC-009"
+        ],
+        "tags": [
+            "malware",
+            "endpoint"
+        ],
+        "responseActions": [
+            {
+                "action": "Scan Endpoint",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10016",
+        "timestamp": "2026-09-16T10:07:54Z",
+        "sourceIP": "192.168.60.12",
+        "destinationIP": "10.0.1.50",
+        "eventType": "SQL Injection Attempt",
+        "severity": "High",
+        "description": "Repeated malicious input was detected in web application requests.",
+        "source": "Web Application Firewall",
+        "affectedSystems": [
+            "Customer Portal"
+        ],
+        "tags": [
+            "web",
+            "sql-injection",
+            "attack"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Request",
+                "status": "Completed"
+            },
+            {
+                "action": "Review Application Logs",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10017",
+        "timestamp": "2026-09-16T11:26:38Z",
+        "sourceIP": "10.20.4.18",
+        "destinationIP": "10.0.5.20",
+        "eventType": "Brute Force Attack",
+        "severity": "Critical",
+        "description": "A high volume of failed authentication attempts was detected against the VPN gateway.",
+        "source": "Authentication Server",
+        "affectedSystems": [
+            "VPN Gateway"
+        ],
+        "tags": [
+            "authentication",
+            "brute-force",
+            "vpn"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Source IP",
+                "status": "Completed"
+            },
+            {
+                "action": "Notify SOC Analyst",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10018",
+        "timestamp": "2026-09-16T12:41:05Z",
+        "sourceIP": "172.16.10.27",
+        "destinationIP": "10.0.4.12",
+        "eventType": "Firewall Rule Violation",
+        "severity": "Low",
+        "description": "A workstation attempted an outbound connection prohibited by policy.",
+        "source": "Firewall",
+        "affectedSystems": [
+            "Employee Workstation"
+        ],
+        "tags": [
+            "firewall",
+            "policy"
+        ],
+        "responseActions": [
+            {
+                "action": "Review Firewall Rule",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10019",
+        "timestamp": "2026-09-16T13:15:29Z",
+        "sourceIP": "192.168.70.46",
+        "destinationIP": "10.0.8.22",
+        "eventType": "Suspicious Login",
+        "severity": "High",
+        "description": "A privileged account was accessed from an unusual network location.",
+        "source": "Authentication Server",
+        "affectedSystems": [
+            "Identity Management Server"
+        ],
+        "tags": [
+            "authentication",
+            "privileged-account",
+            "login"
+        ],
+        "responseActions": [
+            {
+                "action": "Verify User Identity",
+                "status": "Pending"
+            },
+            {
+                "action": "Reset Account Credentials",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10020",
+        "timestamp": "2026-09-16T14:02:41Z",
+        "sourceIP": "10.10.15.91",
+        "destinationIP": "10.0.7.18",
+        "eventType": "Port Scan",
+        "severity": "Medium",
+        "description": "Multiple destination ports were contacted in a short period.",
+        "source": "Network IDS",
+        "affectedSystems": [
+            "Internal Network"
+        ],
+        "tags": [
+            "network",
+            "reconnaissance",
+            "port-scan"
+        ],
+        "responseActions": [
+            {
+                "action": "Review Network Traffic",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10021",
+        "timestamp": "2026-09-16T15:21:18Z",
+        "sourceIP": "172.16.11.63",
+        "destinationIP": "10.0.4.12",
+        "eventType": "Phishing Attempt",
+        "severity": "Medium",
+        "description": "A suspicious attachment was detected in an incoming email.",
+        "source": "Email Security Gateway",
+        "affectedSystems": [
+            "Mail Server",
+            "Employee Workstation"
+        ],
+        "tags": [
+            "phishing",
+            "email",
+            "malware"
+        ],
+        "responseActions": [
+            {
+                "action": "Quarantine Email",
+                "status": "Completed"
+            },
+            {
+                "action": "Notify User",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10022",
+        "timestamp": "2026-09-16T16:04:33Z",
+        "sourceIP": "192.168.80.19",
+        "destinationIP": "10.0.3.17",
+        "eventType": "Data Exfiltration",
+        "severity": "Critical",
+        "description": "A large encrypted transfer to an external host was detected from a database server.",
+        "source": "Network IDS",
+        "affectedSystems": [
+            "Customer Database"
+        ],
+        "tags": [
+            "exfiltration",
+            "encrypted-traffic",
+            "database"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Destination",
+                "status": "Completed"
+            },
+            {
+                "action": "Investigate Database Access",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10023",
+        "timestamp": "2026-09-17T07:51:11Z",
+        "sourceIP": "10.10.18.24",
+        "destinationIP": "10.0.1.11",
+        "eventType": "Malware Detection",
+        "severity": "High",
+        "description": "A malicious macro was detected in a document opened on an endpoint.",
+        "source": "Endpoint Security",
+        "affectedSystems": [
+            "Finance-PC-018"
+        ],
+        "tags": [
+            "malware",
+            "endpoint",
+            "macro"
+        ],
+        "responseActions": [
+            {
+                "action": "Isolate Endpoint",
+                "status": "Pending"
+            },
+            {
+                "action": "Collect Malware Sample",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10024",
+        "timestamp": "2026-09-17T08:44:26Z",
+        "sourceIP": "172.16.12.39",
+        "destinationIP": "10.0.2.30",
+        "eventType": "SQL Injection Attempt",
+        "severity": "Critical",
+        "description": "A web request contained a malicious SQL injection pattern targeting the customer portal.",
+        "source": "Web Application Firewall",
+        "affectedSystems": [
+            "Customer Portal",
+            "Web Server"
+        ],
+        "tags": [
+            "web",
+            "sql-injection",
+            "attack"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Request",
+                "status": "Completed"
+            },
+            {
+                "action": "Review Application Logs",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10025",
+        "timestamp": "2026-09-17T09:37:52Z",
+        "sourceIP": "192.168.90.52",
+        "destinationIP": "10.0.8.22",
+        "eventType": "Suspicious Login",
+        "severity": "Medium",
+        "description": "An unusual login pattern was detected for a standard user account.",
+        "source": "Authentication Server",
+        "affectedSystems": [
+            "Identity Management Server"
+        ],
+        "tags": [
+            "authentication",
+            "login",
+            "anomaly"
+        ],
+        "responseActions": [
+            {
+                "action": "Verify User Identity",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10026",
+        "timestamp": "2026-09-17T10:25:40Z",
+        "sourceIP": "10.20.7.33",
+        "destinationIP": "10.0.4.12",
+        "eventType": "Firewall Rule Violation",
+        "severity": "Low",
+        "description": "A blocked outbound connection matched a restricted network policy.",
+        "source": "Firewall",
+        "affectedSystems": [
+            "Application Server"
+        ],
+        "tags": [
+            "firewall",
+            "policy",
+            "network"
+        ],
+        "responseActions": [
+            {
+                "action": "Review Firewall Rule",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10027",
+        "timestamp": "2026-09-17T11:14:07Z",
+        "sourceIP": "172.16.13.47",
+        "destinationIP": "10.0.5.20",
+        "eventType": "Brute Force Attack",
+        "severity": "High",
+        "description": "Repeated login failures were detected against the remote access service.",
+        "source": "Authentication Server",
+        "affectedSystems": [
+            "VPN Gateway"
+        ],
+        "tags": [
+            "authentication",
+            "brute-force",
+            "vpn"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Source IP",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10028",
+        "timestamp": "2026-09-17T12:02:18Z",
+        "sourceIP": "192.168.100.21",
+        "destinationIP": "10.0.7.18",
+        "eventType": "Port Scan",
+        "severity": "Medium",
+        "description": "Network reconnaissance activity was detected against internal systems.",
+        "source": "Network IDS",
+        "affectedSystems": [
+            "Internal Network",
+            "Web Server"
+        ],
+        "tags": [
+            "network",
+            "reconnaissance",
+            "port-scan"
+        ],
+        "responseActions": [
+            {
+                "action": "Review Network Traffic",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10029",
+        "timestamp": "2026-09-17T13:39:44Z",
+        "sourceIP": "10.10.21.65",
+        "destinationIP": "10.0.6.14",
+        "eventType": "Phishing Attempt",
+        "severity": "High",
+        "description": "An email attempted to redirect an employee to a fraudulent authentication page.",
+        "source": "Email Security Gateway",
+        "affectedSystems": [
+            "Mail Server",
+            "Employee Workstation"
+        ],
+        "tags": [
+            "phishing",
+            "email",
+            "credential-theft",
+            "authentication"
+        ],
+        "responseActions": [
+            {
+                "action": "Quarantine Email",
+                "status": "Completed"
+            },
+            {
+                "action": "Notify User",
+                "status": "Completed"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10030",
+        "timestamp": "2026-09-17T14:27:13Z",
+        "sourceIP": "172.16.14.58",
+        "destinationIP": "10.0.3.17",
+        "eventType": "Data Exfiltration",
+        "severity": "High",
+        "description": "Unexpected outbound database traffic was identified during business hours.",
+        "source": "Network IDS",
+        "affectedSystems": [
+            "Customer Database"
+        ],
+        "tags": [
+            "exfiltration",
+            "database",
+            "data-loss"
+        ],
+        "responseActions": [
+            {
+                "action": "Investigate Database Access",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10031",
+        "timestamp": "2026-09-17T15:11:29Z",
+        "sourceIP": "192.168.110.74",
+        "destinationIP": "10.0.2.21",
+        "eventType": "Malware Detection",
+        "severity": "Medium",
+        "description": "An unknown executable was detected and prevented from running.",
+        "source": "Endpoint Security",
+        "affectedSystems": [
+            "Sales-PC-011"
+        ],
+        "tags": [
+            "malware",
+            "endpoint"
+        ],
+        "responseActions": [
+            {
+                "action": "Scan Endpoint",
+                "status": "Completed"
+            },
+            {
+                "action": "Review Process Tree",
+                "status": "Pending"
+            }
+        ]
+    },
+    {
+        "eventId": "EVT10032",
+        "timestamp": "2026-09-17T16:05:48Z",
+        "sourceIP": "10.20.9.42",
+        "destinationIP": "10.0.1.50",
+        "eventType": "SQL Injection Attempt",
+        "severity": "High",
+        "description": "Repeated suspicious database query patterns were blocked by the web application firewall.",
+        "source": "Web Application Firewall",
+        "affectedSystems": [
+            "Customer Portal"
+        ],
+        "tags": [
+            "web",
+            "sql-injection",
+            "attack",
+            "database"
+        ],
+        "responseActions": [
+            {
+                "action": "Block Request",
+                "status": "Completed"
+            },
+            {
+                "action": "Review Application Logs",
+                "status": "Completed"
+            }
+        ]
+    }
+]
