@@ -1,9 +1,5 @@
-// COS326 Practical 4 2026 - Task 1: MongoDB shell functions
-// Place this file in your home directory (~/.mongoshrc.js); mongosh loads it on start-up.
 
-// ---------------------------------------------------------------
-// Question 1.2 - Insert security events
-// ---------------------------------------------------------------
+// 1.2 - Insert security events
 function insertSecurityEvents(dbName, colName, count) {
     if (!Number.isInteger(count) || count <= 0) {
         print("Error: count must be a positive integer.");
@@ -64,9 +60,7 @@ function insertSecurityEvents(dbName, colName, count) {
           + dbName + "." + colName + ".");
 }
 
-// ---------------------------------------------------------------
 // Question 1.3 - Find events by source IP
-// ---------------------------------------------------------------
 function findEventsByIP(dbName, colName, sourceIP) {
     var col = db.getSiblingDB(dbName).getCollection(colName);
     var results = col.find({ sourceIP: sourceIP }).toArray();
@@ -78,9 +72,7 @@ function findEventsByIP(dbName, colName, sourceIP) {
     results.forEach(function (d) { printjson(d); });
 }
 
-// ---------------------------------------------------------------
 // Question 1.4 - Update severity for an event type
-// ---------------------------------------------------------------
 function updateSeverity(dbName, colName, eventType, newSeverity) {
     var col = db.getSiblingDB(dbName).getCollection(colName);
     var res = col.updateMany({ eventType: eventType }, { $set: { severity: newSeverity } });
@@ -88,9 +80,7 @@ function updateSeverity(dbName, colName, eventType, newSeverity) {
     print("Documents modified: " + res.modifiedCount);
 }
 
-// ---------------------------------------------------------------
 // Question 1.5 - Remove low severity events
-// ---------------------------------------------------------------
 function removeLowSeverityEvents(dbName, colName) {
     var col = db.getSiblingDB(dbName).getCollection(colName);
     var res = col.deleteMany({ severity: "Low" });
