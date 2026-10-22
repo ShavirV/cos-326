@@ -1,0 +1,105 @@
+// cursors and iteration
+// works like the iterator pattern
+// an object used to iterate over the documents returned by a query
+
+// for some reason we using javascript now
+
+//assign the result of a basic query (get everything) to a var
+//c is of type cursor object
+const c = db.testCollection.find()
+
+//we can use a while loop to print out all documents in the set
+
+while (c.hasNext() ){
+    printjson(c.next())
+}
+
+//manipulate the cursor object as if its an array
+const documents = c.toArray()
+printjson(documents[4])
+
+// functions used:
+hasNext()
+next()
+printjson()
+toArray() //convert the REMAINING cursor results into an array
+
+// EMBEDDED DOCUMENTS
+// a nested document
+// so BSON objects inside of BSON objects
+
+doc = {
+    username: "user",
+    contact: {
+        phone : '0785312485',
+        email : 'emmail',=
+    },
+    access : {
+        level: 5,
+        group: dev
+    }
+}
+db.users.insertOne(doc)
+
+// querying the embedded document collection
+var c = db.users.find({
+    access: {
+        level: 5, 
+        group: "dev"
+    }
+})
+
+while (c.hasNext()){
+    printjson(c.next())
+}
+
+// ARRAY OPERATIONS
+// if a field holds an array, we can query for:
+// an exact match on the array
+// or specific values in the array
+// if the array itself holds embedded documents, we can query for specific
+// fields in the embedded documents using dot notation
+
+// using this format for documents in a collection
+    {"_id": 5, "type": "food", "item": "cake",   "ratings": [5, 8, 9]}
+
+// exact array match. uses the equals to operator
+db.inventory.find({
+    ratings: [5, 8, 9]
+})
+
+//matching an array element, dont use []
+// returns all documents that have a '5' as at least one element
+db.inventory.find({
+    ratings: 5
+})
+
+//can specify multiple criteria
+//this works a bit weird, one element can satisfy one condition
+//while another satisfies the other condition
+//or you can have a single element satisfying both
+// [1, 10] will return
+// [6] will also return 
+db.inventory.find({
+    ratings: {
+        $gt: 5,
+        $lt: 9
+    }
+})
+
+// this can be made less weird by using an $elemMatch
+// will only return where the ratings array contains at least
+// one element greater than 5 AND less than 9
+// [1, 10] nope
+// [6] yep
+db.inventory.find({
+    ratings: {
+        $elemMatch: {
+            $gt 5,
+            $lt 9
+        }
+    }
+})
+
+//an array of embedded documents
+
