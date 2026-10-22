@@ -102,4 +102,96 @@ db.inventory.find({
 })
 
 //an array of embedded documents
+{
+    _id: 100,
+    type: "food",
+    item: "xyz",
+    qty : 25, 
+    price: 2.5,
+
+    ratings: [ 5, 8, 9 ],
+
+    // an array of embedded documents
+    memos: [
+        { 
+            memo: "on time",
+            by: "shipping" 
+        },
+        { 
+            memo: "approved",
+            by: "billing" 
+        }
+    ]       
+}
+
+//select all documents where the memos field contains an array
+//whose first element (memos.0) is a document with the field 'by',
+//which has the value 'shipping'
+db.inventory.find({
+    'memos.0.by': 'shipping'
+})
+
+
+// aggregation 
+// list all elements in the blogs collection without the _id
+db.blogs.find( {}, {_id:0, title:1, likes:1})
+
+//AGGREGATION 
+
+db.<collection>.aggregate(OPERATION)
+
+//These functions are defined:
+$sum
+$avg
+$min
+$max
+
+// there is also an aggregation pipeline that can be applied
+// at each step a new operation is done before passing to the next step
+
+db.<collection>.aggregate(OPERATION)
+
+// apply an array of aggregation stages
+db.collection.aggregate([
+    {$match: <doc criterion>},
+    {$match: <group spec>},
+    {$match: <sort spec>}
+])
+
+// compute the total number of 'likes' for each title 
+// assuming an array {likes: [1, 2, 3]}
+db.blogs.aggregate([
+    {
+        $group:
+        {
+            _id: "$title,
+            num_likes: {$sum: "$likes}
+        }
+    }
+])
+
+//adding on, computing the number of likes
+//for the title neo4j
+db.blogs.aggregate({
+    {$match: {title: "neo4j"}}
+    {$group:
+        {
+            _id: "$title",
+            num_likes: {$sum: "$likes"}
+        }    
+    }
+})
+
+//same thing but sort in ascending order of number of likes
+db.blogs.aggregate([
+    {
+        $group:
+        {
+            _id: "$title,
+            num_likes: {$sum: "$likes}
+        }
+    }
+    {$sort: {"num_likes": 1}}
+])
+
 
