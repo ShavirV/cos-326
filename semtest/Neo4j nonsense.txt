@@ -96,4 +96,107 @@ RETURN psN, follows
 
 //now this should return the people that follow shav
 
+// Lecture 18 - Neo4j part 2
 
+//CRUD clauses:
+
+- CREATE
+- MERGE
+- SET       - update a node or rel
+- DELETE    - delete the node or rel
+- REMOVE    - remove properties from elements
+- FOREACH   - iterate over a path, or a collection created by aggregation
+- DETACH / DELETE - delete a node or a set of nodes. also deletes associated relationships
+
+// SET using MATCH to find a specific node
+MATCH (psN:Person)-[r:FOLLOWS]->(psT:Person)
+WHERE psN.name = "neo" AND psT.name = "Thandi" // so we know theres only really one relation
+SET r.since = 2018 // update the property of the relation between these nodes
+RETURN psN, r, psT
+
+// MERGE can be used only ON CREATE or ON MATCH or both
+
+MERGE (psT:Person [name: "Thandi"])
+ON MATCH SET psT.age = 21 
+ON CREATE SET 
+    psT.from = "durban",
+    psT.hobby = "singing",
+    psT.age = 21
+RETURN psT; 
+
+// ON MATCH SET means if we see this node in existence, set the age field to 21
+// ON CREATE SET means if this node does not exist, set all of those fields to those values
+
+
+// DELETE
+
+// Deleting a relationship
+// We use ()-[]->() to find the relationship between these two nodes
+// If any such relation exists, we store it in r and then delete it
+MATCH (psT:Person {name: "Thandi})-[r:FOLLOWS]->(psN:Person {name: "neo"})
+DELETE r;
+
+// Deleting a node and its connected relationships
+// DELETE on its own cannot delete a node that still has relationships
+// DETACH DELETE removes this node and its connected relationships
+// almost like a weird version of memory management in c++
+
+MATCH (p:Person {name: "zorro"})
+DETACH DELETE p;
+
+// DELETE for graph elements (nodes and relationships)
+// delete all nodes of group Person and all connected relationships
+MATCH (psN:Person)
+DETACH DELETE psn;
+
+//REMOVE
+
+//sort of like a lighter delete
+//remove properties and labels from graph elements
+//also an alternate way of matching by a certain field
+//after this zorro will have no hobby field
+MATCH (psZ:Person)
+WHERE psz.name = "zorro"
+REMOVE psZ.hobby
+return psZ;
+
+//READING clauses
+
+MATCH - Allows you to specify patterns that Cypher will search for in the DB
+OPTIONAL MATCH - If no matches are found, will use NULLS for missing parts of the pattern
+WHERE - Filter the results of MATCH, OPTIONAL MATCH, & with
+AGGREGATION clauses - works like group by in SQL
+
+MATCH (<var>) //resolves to any node
+MATCH (<var> : <label>) //single node pattern, matches will be all nodes of type <label>
+MATCH (<var1> {key:val})-->(<var2>) //specifies a path from var 1 to var 2 -->
+
+MATCH (psT:Person) RETURN psT; //entire set of nodes
+MATCH (psT:Person) RETURN psT.name //names for each node in label
+
+// ORDER BY ussed for soring in a MATCH
+
+MATCH(psn) RETURN psn.name ORDER BY psn.name;
+
+
+// AGGREGATION FUNCTIONS
+
+//'GROUP BY' 
+// an implicit group by using n.name as the grouping key, with the aggregate count(x)
+MATCH (n {name: 'A'})-->(x)
+RETURN n.name, count(x)
+
+RETURN count(*)
+RETURN sum(n.numeric)
+RETURN avg(n.property)
+RETURN stdev(n.property)
+RETURN max(n.property)
+RETURN min(n.property)
+RETURN collect(n.property)
+    //returns a collection, a list of values
+RETURN count(DISTINCT b.name)
+
+//count the number of people that thandi follows
+
+MATCH (psT {name: "Thandi})-[:FOLLOWS]->(followed)
+RETURN psT.name, count(*) AS count_follows;
