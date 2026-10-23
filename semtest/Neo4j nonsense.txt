@@ -1,0 +1,99 @@
+// a graph database
+
+// the graph ADT
+Graph()
+addVertex(vert)
+addEdge(fromVert, toVert)
+addEdge(fromVert, toVert, weight)
+getVertex(vertKey)
+getVertices()
+in -> true for statements in the form vertex in graph, if the obvious is true
+
+// we store data using simple graph theory concepts:
+// Nodes - data objects
+// Relationships - edges connecting Nodes
+// Properties - named data values (attributes are expressed as key value pairs)
+
+// represent social networks, generate reccomendations
+
+// uses Cypher as its query language
+
+//labels can be used to associate a group of Nodes
+//can group nodes together by applying the same label to each member
+//for instance all people can be given the label 'Person'
+
+//A Neo4j relationship:
+
+- start node
+- end node
+- exactly one relationship type
+- an optional set of Properties
+- a direction
+
+For instance, a FOLLOWS relationship can have a property 'since', associated with a year
+
+Cypher is declarative like SQL, describing what to do, not how to do it.
+
+//CREATION
+
+CREATE(psT:Person {
+    name: "shav",
+    from: "pta",
+    hobby: "notthis"
+})
+
+//() used to indicate a node
+// psT:Person, a var psT, label 'Person' for the new node
+// {} properties for the node
+
+
+//CREATE does not check for whether data already exists or not, it just adds the thing as a new node
+//use a MERGE when we dont want to create duplicate nodes
+
+CREATE 
+    (psJ:Person { name: "johan", from: "pta", hobby: "surfing"}),
+    (psN:Person { name: "neo", from: "cpt", hobby: "soccer"}),
+
+    (psT)-[:FOLLOWS {since: 2012}]->(psJ),
+    (psT)-[:FOLLOWS {since: 2009}]->(psN),
+    (psJ)-[:FOLLOWS {since: 2010}]->(psT)
+
+//use (from)-[:rel {relattr}]->(to)
+//to define a relationship between nodes
+// its like a stupid lil picture of a graph with an arrow and relationship
+// ()-[]->()
+
+//MATCH - finding nodes
+
+MATCH(psT:Person)           //specify a pattern of nodes an relationships
+WHERE psT.name = "shav",    //constrain the results 
+RETURN psT;                 //what do we return 
+
+// can use MATCH to get a whole chunk of a graph at once?
+
+MATCH (n)-[r]->(m)
+RETURN n, r, m
+
+// this kinda works like prolog in a weird way
+// pattern matching
+// we can describe what to find in the graph
+// for instance the people that shav FOLLOWS
+
+// genuinely just predicates and that nonsense
+
+MATCH (psN:Person)->[:FOLLOWS]->(followed)
+WHERE psN.name = "shav"
+RETURN psN, followed
+
+// (followed) will be bound to the people that psN has the relation FOLLOWS with
+// we then provide a restriction for which nodes can actually be psN
+
+// i think it can also work in the opposite way
+
+MATCH (follows)->[:FOLLOWS]->(psN)
+WHERE psN.name = "shav"
+RETURN psN, follows
+
+//now this should return the people that follow shav
+
+
