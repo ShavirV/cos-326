@@ -195,3 +195,139 @@ db.blogs.aggregate([
 ])
 
 
+//all of the missing stuff was done but not pushed
+//need to do more on aggregation
+
+// compute total number of likes for the documents
+//then show results in ascending order based on likes
+//then show only those with a total > 300
+
+db.blogs.aggregate([
+    {
+        $group: {
+            _id: "$title",
+            num_likes: {$sum: "$likes}
+        }
+    },
+    {
+        $match: {
+            num_likes: {$gt 300}
+        }
+    },
+    {
+        $sort: {
+            num_likes: 1
+        }
+    }
+])
+
+//design considerations need to be made
+
+//use embedded documents or use references
+//embedded is better for data that needs to be retrieved in one OPERATIONS
+//used for data that is frequently accessed together (without joins basically)
+//referenced (normalised) allows relationships between documents
+//these related documents can be handled separately, or $lookup
+//embedding means duplication of data but no significant read performance increases
+
+//Lecture 17: last one on monogo
+
+//searching for text: if we have a longer string as a field, and we want to basically grep item
+
+//text indexes are needed when using $text to search the contents of strings
+//these indexes can be applied to any string field, or array of string elements
+
+//apply a text index to the comments field
+db.createIndex({comments: "text"})
+
+// use the dropIndex() method to clear the index
+
+//search for documents that have the word "big" in the comments. case insensitive by default
+var c = db.blogs.find({
+    $text: {$search: "big"}
+})
+while (c.hasNext()){
+    printjson(c.next())
+}
+
+//can search for multiple strings, works like an OR
+//documents with the word 'big' or 'data'
+var c = db.blogs.find({
+    $text: {$search: "big data"}
+})
+while (c.hasNext()){
+    printjson(c.next())
+}
+
+//can use wildcard specifier ($**) to index all fields
+//in the collection with string content
+//useful for really messy unstructured data but it can negatively affect performance 
+db.collection.createIndex({ "S**": "text" })
+
+//text search within the aggregation pipeline
+//can be done using:
+//the $text query operator when in the $match stage
+
+//the $match including a $text must be the FIRST stage in the pipeline
+//a text operator can only occur once in this stage
+//and the text operator cannot appear in an $or or $not expression
+
+//seach for the term 'nosql' in the $match stage
+//then calculate the total likes for the matching documents in the $group stage
+db.blogs.aggregate([
+    {
+        $match: {
+            $text: {$search: "nosql}
+        }
+    }
+    {
+        $group: {
+            _id: null,
+            totalLikes: { $sum: "$likes"}
+        }
+    }
+])
+
+//MONGOSH client functions
+
+//a javascript function creating new data
+//just creates a bunch of documents with the field x := i
+function insertData(dbName, colName, num) {
+    const col = db.getSiblingDB(dbName).getCollection(colName);
+    for (i = 0; i < num; i++){
+        col.insertOne([x: i]);
+    }
+    print(col.countDocuments())
+}
+
+//usage: insertData("mydb", "testCollection", 20);
+
+//this function can be stored in a .mongoshrc.js for future use.
+
+//recall a query to compute the total number of likes
+//this is a pain in the ass having a raw query whenever this aggregate is needed
+//generalise it into a function
+function computeTotalLikes(dbName, colName, blogTitle){
+    var col = db.getSiblingDB(dbName).getCollection(colName);
+
+    var res = col.aggregate([
+        {
+            $match: {title: blogTitle}
+        },
+        {
+            $group: {
+                _id: blotTitle,
+                num_likes: {$sum: "$likes"}
+            }
+        }
+    ]);
+
+    //print out all the results
+    while (res.hasNext()){
+        printjson(res.next());
+    }
+}
+
+//mongodb Java Driver provides an API for java apps to use mongodb
+//hope it isnt too heavily tested
+

@@ -16,7 +16,7 @@ db.createCollection("myCollection")
 db.myCollection.insertOne(doc)
 
 // we can also implicitly create a collection by inserting without initialisation
-db.myCollection.insertOne({name: "value", x: 3}
+db.myCollection.insertOne({name: "value", x: 3})
 
 // delete a collection
 db.myCollection.drop()
