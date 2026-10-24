@@ -1,0 +1,119 @@
+// list names of all staff - will be xml thingys firstname and lastname
+for $N in //STAFF/NAME return $N
+
+//list the last names
+for $N in //STAFF/NAME/LNAME/text() return #N
+
+//list staff with salary == 30 000
+let $SAL := 30000
+return //STAFF[SALARY = $SAL]
+
+//find staff at branch B004 with salary > 15000
+for $S in //STAFF
+where $S/SALARY > 15000 and $S/@branchNo == "B004"
+return $S/NAME
+
+//list staffnumbers of all staff in ascending order
+for $S in //STAFF 
+order by $S/STAFFNO ascending
+return $S/STAFFNO
+
+//aggregations
+for $B in distinct-values(//@branchNo)
+let $avgSalary := avg(//STAFF[@branchNo = $B]/SALARY)
+
+return 
+    <BRANCH>
+            <BRANCHNO>{$B}</BRANCHNO>
+            <AVGSALARY>{$avgSalary}</AVGSALARY>
+    </BRANCH>
+
+//branches with at least one member of staff has a salary > 15000
+for $B in distinct-values(//@branchNo)
+let $S := //STAFF[@branchNo = $B]
+    where some $sal in $S/SALARY
+        satisfies ($sal > 15000) //subquery to apply criterion to this staff thingy
+return <BRANCHNO>{$B}</BRANCHNO>
+
+//JOINING - list names of staff and next of kin
+
+for $S in //STAFF, $NOK in //NOK
+where $S/STAFFNO = $NOK/STAFFNO
+return 
+    <STAFFNOK>
+        {$S/NAME, $NOK/NAME}
+    </STAFFNOK>
+
+//alternate way to do it the a correlated subquery
+for $S in //STAFF
+return 
+<STAFFNOK>
+    {$S/NAME}
+    {for $NOK in //NOK
+     where $S/STAFFNO = $NOK/STAFFNO
+     return $NOK/NAME}
+</STAFFNOK>
+
+//BaseX functions
+let $mult := function($x, $y) {$x * Sy}
+        or:= math:pow#2
+return $mult(10, 10)
+
+//XML part 4
+
+// approaches to storing XML in a realtional or OR DB
+- value of a column - simple not the greatest
+- shredded - decompose into individual elements
+- schema independent - create a relational table from the DOm of the xml document
+- parsed form (internal) - 
+
+in sql:
+
+// returns an xml element with staffname as the root element and the other stuff as a child of the root element
+SELECT xmlelement(NAME staffname, concat(fName, lName))
+
+// an elemennt can have zero or more attributes <stuffs within the tag>
+//done with a nested call of attributes in element
+SELECT xmlelement (NAME staff,
+                   xmlattributes(branchNo AS "branchNo"))
+FROM Staff;
+
+// list all staff as XML elements with name and branch number as attributes
+SELECT staffNo, xmlelement(
+    NAME staff,
+    xmlattributes(branchNo as "branchNo"),
+    concat(fName, lName)
+) AS staffXMLCol from Staff
+
+mapping function from tables to XML docs:
+
+1) mapped table data - table_to_xml
+2) an xml schema describing the mapped data - table_to_xmlschema
+
+
+SELECT table_to_xml('Numbers', false, false);
+SELECT query_to_xml('SELECT num1, num2 FROM Numbers', false, false);
+
+// same thing for table_to_xmlschema and query_to_xmlschema
+
+// creating a table with an XML type:
+
+- simply add a <name> XML into the table creation or update
+- then insertion are done as xx, yy, XML('<xml>')
+
+// can use XPath queries within SQL queries
+// xpath('xpath_expr', colname)
+SELECT xpath('/STAFF/STAFFNO', staffData) AS StaffNumberXML from XMLStaff
+
+// if we want to remove tags use the text() function within the xpath query
+
+unnest() function can be used to convert an array into a table llike structure
+- essentially remove the XML tags from whatever its nested in, so now it stands on its own.
+
+pg_Is_dir()
+pg_read_file()
+
+
+
+
+
