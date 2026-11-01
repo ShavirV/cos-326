@@ -1,0 +1,258 @@
+
+:use system
+CREATE DATABASE COS326Prac5 IF NOT EXISTS;
+SHOW DATABASES YIELD name, currentStatus WHERE name = 'cos326prac5';
+
+// switch to the new database for everything that follows
+:use COS326Prac5
+
+// Constraints (also create indexes, so MATCH by name/id is fast and the
+// import cannot create duplicate accounts / posts)
+CREATE CONSTRAINT person_id_unique   IF NOT EXISTS FOR (p:Person) REQUIRE p.id   IS UNIQUE;
+CREATE CONSTRAINT person_name_unique IF NOT EXISTS FOR (p:Person) REQUIRE p.name IS UNIQUE;
+CREATE CONSTRAINT post_id_unique     IF NOT EXISTS FOR (po:Post) REQUIRE po.id   IS UNIQUE;
+
+// Q1.1a  Create Person nodes from persons.csv                     
+// Copy persons.csv and follows.csv into the DBMS "import" folder first.
+// ID is converted to an INTEGER; the CSV column is "ID", the node
+// property is "id".
+LOAD CSV WITH HEADERS FROM 'file:///persons.csv' AS row
+WITH row, replace(row.name, '"', '') AS n0
+WITH toInteger(replace(row.ID, '"', '')) AS id,
+     CASE WHEN n0 ENDS WITH ',' THEN left(n0, size(n0) - 1) ELSE n0 END AS name
+WHERE id IS NOT NULL AND name <> ''
+MERGE (p:Person {id: id})
+SET p.name = name;
+
+// Q1.1b  Create FOLLOWS relationships from follows.csv             (3)
+// Source = column "person", destination = column "follows" (account
+// names). MATCH (not MERGE) on the nodes so no extra Person nodes are
+// created for unknown accounts; MERGE on the relationship so re-running
+// the import does not create duplicates.
+LOAD CSV WITH HEADERS FROM 'file:///follows.csv' AS row
+WITH replace(row.person, '"', '') AS p0, replace(row.follows, '"', '') AS f0
+WITH CASE WHEN p0 ENDS WITH ',' THEN left(p0, size(p0) - 1) ELSE p0 END AS src,
+     CASE WHEN f0 ENDS WITH ',' THEN left(f0, size(f0) - 1) ELSE f0 END AS dst
+MATCH (a:Person {name: src})
+MATCH (b:Person {name: dst})
+MERGE (a)-[:FOLLOWS]->(b);
+
+// Q1.2a  Total Person nodes and total FOLLOWS relationships        (2)
+// (expected: 8828 and 4907)
+MATCH (p:Person)
+WITH count(p) AS totalPersons
+OPTIONAL MATCH ()-[r:FOLLOWS]->()
+RETURN totalPersons, count(r) AS totalFollows;
+
+// Q1.2b  Sample of five people and their outgoing FOLLOWS         (2)
+// Only people who actually follow someone are sampled.
+MATCH (p:Person)-[:FOLLOWS]->()
+WITH DISTINCT p LIMIT 5
+MATCH (p)-[r:FOLLOWS]->(f:Person)
+RETURN p.name AS person, collect(f.name) AS follows, count(r) AS followingCount
+ORDER BY person;
+
+// Q1.2b (graph view - use the Graph tab in Neo4j Browser for a screenshot)
+MATCH (p:Person)-[:FOLLOWS]->()
+WITH DISTINCT p LIMIT 5
+MATCH (p)-[r:FOLLOWS]->(f:Person)
+RETURN p, r, f;
+
+// Extra sanity check: no mangled names / missing IDs survived the clean-up (expect 0)
+MATCH (p:Person)
+WHERE p.name CONTAINS '"' OR p.name ENDS WITH ',' OR p.id IS NULL
+RETURN count(p) AS problemNodes;
+
+// Q2.1a  All distinct node labels in the database                  (1)
+MATCH (n)
+UNWIND labels(n) AS label
+RETURN DISTINCT label
+ORDER BY label;
+// (alternative using the catalog procedure: CALL db.labels() YIELD label RETURN label;)
+
+// Q2.1b  Names of all people in alphabetical order, first 20       (1)
+// (case-insensitive ordering, case-sensitive name as tie-breaker)
+MATCH (p:Person)
+RETURN p.name AS name
+ORDER BY toLower(name), name
+LIMIT 20;
+
+// Q2.1c  Distinct relationship types present in the graph          (1)
+// (run this AFTER Q2.3 to also see POSTED / REPOSTED / LIKED)
+MATCH ()-[r]->()
+RETURN DISTINCT type(r) AS relationshipType
+ORDER BY relationshipType;
+// (alternative: CALL db.relationshipTypes() YIELD relationshipType RETURN relationshipType;)
+
+// Q2.1d  Names of people who follow a specified account (parameter) (1)
+:param account => '@mileycyrus';
+MATCH (follower:Person)-[:FOLLOWS]->(target:Person {name: $account})
+RETURN follower.name AS follower
+ORDER BY follower;
+
+// Q2.2a  Five accounts with the most incoming FOLLOWS              (2)
+// (expected top 3: @mileycyrus 30, @tommcfly 21, @ddlovato 17)
+MATCH (:Person)-[:FOLLOWS]->(p:Person)
+RETURN p.name AS account, count(*) AS followerCount
+ORDER BY followerCount DESC, account ASC
+LIMIT 5;
+
+// Q2.2b  Number of accounts each person follows; top five          (2)
+// (people who follow nobody have a count of 0 and can never be in the
+//  top five, so they are not listed)
+MATCH (p:Person)-[:FOLLOWS]->(:Person)
+RETURN p.name AS person, count(*) AS followingCount
+ORDER BY followingCount DESC, person ASC
+LIMIT 5;
+
+// Q2.3a  Create three Post nodes + POSTED relationships            (2)
+// MERGE on the unique post id => re-running does not duplicate posts.
+// The posters are existing Person nodes (MATCH).
+MERGE (po:Post {id: 'P001'})
+  SET po.hashtag = '#Security', po.message = 'Verify suspicious links'
+WITH po
+MATCH (a:Person {name: '@mileycyrus'})
+MERGE (a)-[:POSTED]->(po);
+
+MERGE (po:Post {id: 'P002'})
+  SET po.hashtag = '#Awareness', po.message = 'Protect your account'
+WITH po
+MATCH (a:Person {name: '@tommcfly'})
+MERGE (a)-[:POSTED]->(po);
+
+MERGE (po:Post {id: 'P003'})
+  SET po.hashtag = '#Updates', po.message = 'Review account activity'
+WITH po
+MATCH (a:Person {name: '@ddlovato'})
+MERGE (a)-[:POSTED]->(po);
+
+// Q2.3b  REPOSTED and LIKED relationships between existing nodes   (1)
+// MATCH finds the existing Person/Post nodes, MERGE only creates the
+// relationship - no duplicate nodes. The reposters/likers are accounts
+// that follow the poster in the dataset.
+UNWIND [
+  {who: '@nathiuria',    post: 'P001'},     // follows @mileycyrus
+  {who: '@MonaColonia',  post: 'P001'},     // follows @mileycyrus
+  {who: '@Chasingabuzz', post: 'P002'}      // follows @tommcfly
+] AS x
+MATCH (r:Person {name: x.who})
+MATCH (po:Post {id: x.post})
+MERGE (r)-[:REPOSTED]->(po);
+
+UNWIND [
+  {who: '@JacquiOx',     post: 'P001'},     // follows @mileycyrus
+  {who: '@mcflyholland', post: 'P002'},     // follows @tommcfly
+  {who: '@AlenaVogt',    post: 'P003'}      // follows @ddlovato
+] AS x
+MATCH (l:Person {name: x.who})
+MATCH (po:Post {id: x.post})
+MERGE (l)-[:LIKED]->(po);
+
+// Q2.3c  Account names, hashtags and messages of reposted posts    (1)
+// "account" = the author of the post; the reposters are shown as well.
+MATCH (author:Person)-[:POSTED]->(po:Post)<-[:REPOSTED]-(reposter:Person)
+RETURN author.name AS account, po.id AS postId, po.hashtag AS hashtag,
+       po.message AS message, collect(DISTINCT reposter.name) AS repostedBy
+ORDER BY postId;
+
+
+// TASK 3: PATH ANALYSIS AND NETWORK INVESTIGATION
+// FOLLOWS is DIRECTED: (a)-[:FOLLOWS]->(b) means "a follows b", so paths
+// only travel in the direction of the arrows.
+// Enter the investigator's account names here:
+//   source = first account, target = second account
+// Demo values: @jowhit reaches @DonnaMirfield in 5 hops;
+//              @mileycyrus follows nobody, so @mileycyrus -> @jowhit has
+//              NO path (use it to demonstrate the "no path" handling).
+:param source => '@jowhit';
+:param target => '@DonnaMirfield';
+
+// Q3.1a  Accounts reachable from the first account by following one or
+//        two FOLLOWS relationships, with the path length          (2)
+// The start account is excluded as a destination (self-follows / 2-cycles).
+// An account reachable in both 1 and 2 hops is shown once, with its
+// shortest length.
+MATCH (start:Person {name: $source})
+MATCH p = (start)-[:FOLLOWS*1..2]->(other:Person)
+WHERE other <> start
+RETURN other.name AS reachableAccount, min(length(p)) AS pathLength
+ORDER BY pathLength, reachableAccount;
+
+// Q3.1a (variant using both account names: is the second account
+//        reachable from the first within one or two hops?)
+MATCH (start:Person {name: $source}), (dest:Person {name: $target})
+OPTIONAL MATCH p = (start)-[:FOLLOWS*1..2]->(dest)
+WHERE start <> dest
+RETURN start.name AS source, dest.name AS target,
+       p IS NOT NULL AS reachableWithinTwoHops,
+       min(length(p)) AS pathLength;
+
+// Q3.1b  Nodes and relationships along a path between two accounts (2)
+// Up to 5 directed paths (up to 6 hops), shortest first. OPTIONAL MATCH
+// keeps one row with NULLs when there is no path, and COALESCE turns it
+// into a readable message.
+MATCH (a:Person {name: $source}), (b:Person {name: $target})
+OPTIONAL MATCH p = (a)-[:FOLLOWS*1..6]->(b)
+WHERE a <> b
+WITH a, b, p
+ORDER BY length(p)
+LIMIT 5
+RETURN a.name AS source, b.name AS target,
+       CASE WHEN p IS NULL THEN 'No path found' ELSE 'Path found' END AS status,
+       [n IN nodes(p) | n.name] AS accountsOnPath,
+       [r IN relationships(p) | startNode(r).name + ' -[:' + type(r) + ']-> ' + endNode(r).name] AS relationshipsOnPath,
+       coalesce(length(p), -1) AS hops;
+// (in the Browser Graph tab use:  RETURN p  instead, to draw the path)
+
+// Q3.1c  Shortest path between two accounts, FOLLOWS only          (2)
+// shortestPath() is a breadth-first search; a bound of 15 hops keeps it
+// cheap. OPTIONAL MATCH => a row with status 'No path found' if none.
+MATCH (a:Person {name: $source}), (b:Person {name: $target})
+OPTIONAL MATCH p = shortestPath((a)-[:FOLLOWS*..15]->(b))
+WHERE a <> b
+RETURN a.name AS source, b.name AS target,
+       CASE WHEN p IS NULL THEN 'No path found' ELSE 'Path found' END AS status,
+       [n IN nodes(p) | n.name] AS route,
+       length(p) AS hops;
+
+// Q3.1c - demonstrate the "no path" branch:
+:param source => '@mileycyrus';
+:param target => '@jowhit';
+MATCH (a:Person {name: $source}), (b:Person {name: $target})
+OPTIONAL MATCH p = shortestPath((a)-[:FOLLOWS*..15]->(b))
+WHERE a <> b
+RETURN a.name AS source, b.name AS target,
+       CASE WHEN p IS NULL THEN 'No path found' ELSE 'Path found' END AS status,
+       [n IN nodes(p) | n.name] AS route,
+       length(p) AS hops;
+
+// Q3.2a  People who have posted + Boolean: has at least one of their
+//        posts been reposted?                                       (2)
+MATCH (p:Person)-[:POSTED]->(po:Post)
+OPTIONAL MATCH (po)<-[r:REPOSTED]-(:Person)
+WITH p, count(r) AS repostCount
+RETURN p.name AS person, repostCount > 0 AS hasRepostedPost
+ORDER BY person;
+
+// Q3.2b  Total posts, reposted posts and liked posts - each post is
+//        counted once, however many reposts/likes it has            (2)
+// The EXISTS tests give one Boolean per post, so a post with several
+// relationships is never counted twice.
+MATCH (po:Post)
+WITH po,
+     EXISTS { (po)<-[:REPOSTED]-(:Person) } AS isReposted,
+     EXISTS { (po)<-[:LIKED]-(:Person) }    AS isLiked
+RETURN count(po) AS totalPosts,
+       sum(CASE WHEN isReposted THEN 1 ELSE 0 END) AS repostedPosts,
+       sum(CASE WHEN isLiked    THEN 1 ELSE 0 END) AS likedPosts;
+
+// Q3.2c  Accounts directly connected to a specified account through an
+//        incoming or outgoing FOLLOWS, with the direction           (2)
+:param account => '@Hollywood_Trey';
+MATCH (a:Person {name: $account})-[r:FOLLOWS]-(other:Person)
+RETURN other.name AS connectedAccount,
+       CASE WHEN startNode(r) = a
+            THEN 'OUTGOING (' + a.name + ' follows ' + other.name + ')'
+            ELSE 'INCOMING (' + other.name + ' follows ' + a.name + ')'
+       END AS direction
+ORDER BY direction, connectedAccount;
