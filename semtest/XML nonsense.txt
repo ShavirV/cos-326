@@ -1,0 +1,51 @@
+//XML 1
+- data-centric, document-centric or hybrid
+
+<xml version = "1.0" encoding = "UTF-8">
+<xs:schema xsmlns:xs = "http://www.w3.org/2001/XMLSchema>
+<xs:element
+    name = "contact>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name = "name" type = "xs:string" >
+                <xs:element name = "company" type = "xs:string" >
+                <xs:element name = "phone" type = "xs:int" >
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
+
+xsd:complexType
+
+simple type: <xs:element name = "phone_number" type = "xs:int" />
+    - xs:integer, xs:boolean, xs:string, xs:date
+
+complex type: contains other types.
+A way of adding some kind of structure.
+Now only elements of type Address can use this structure
+
+<xs:element name="Address">
+...some structure
+</xs:element>
+
+Global types are declared once and reused throughout
+
+<xs:complexType name="AddressType">
+...structure
+</xs:complexType>
+
+//reused by multiple elements
+
+<xs:element name="BillingAddress" type="AddressType" />
+<xs:element name="AnotherAddress" type="AddressType" />
+
+//XML 2
+
+xpath - declarative
+uses a directory like path, with possible conditions placed along the path
+returning a collection of elements
+
+
+//XML 3
+
+//XML 4

@@ -42,7 +42,7 @@ CREATE(psT:Person {
     hobby: "notthis"
 })
 
-//() used to indicate a node
+// () used to indicate a node
 // psT:Person, a var psT, label 'Person' for the new node
 // {} properties for the node
 
